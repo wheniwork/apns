@@ -32,25 +32,28 @@ type Client struct {
 	CertificateBase64 string
 	KeyFile           string
 	KeyBase64         string
+	Timeout           time.Duration
 }
 
 // BareClient can be used to set the contents of your
 // certificate and key blocks manually.
-func BareClient(gateway, certificateBase64, keyBase64 string) (c *Client) {
+func BareClient(gateway, certificateBase64, keyBase64 string, timeout time.Duration) (c *Client) {
 	c = new(Client)
 	c.Gateway = gateway
 	c.CertificateBase64 = certificateBase64
 	c.KeyBase64 = keyBase64
+	c.Timeout = timeout
 	return
 }
 
 // NewClient assumes you'll be passing in paths that
 // point to your certificate and key.
-func NewClient(gateway, certificateFile, keyFile string) (c *Client) {
+func NewClient(gateway, certificateFile, keyFile string, timeout time.Duration) (c *Client) {
 	c = new(Client)
 	c.Gateway = gateway
 	c.CertificateFile = certificateFile
 	c.KeyFile = keyFile
+	c.Timeout = timeout
 	return
 }
 
@@ -133,7 +136,7 @@ func (client *Client) ConnectAndWrite(resp *PushNotificationResponse, payload []
 	// timeouts when the notification succeeds.
 	timeoutChannel := make(chan bool, 1)
 	go func() {
-		time.Sleep(time.Second * TimeoutSeconds)
+		time.Sleep(client.Timeout)
 		timeoutChannel <- true
 	}()
 
